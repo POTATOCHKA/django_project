@@ -5,11 +5,45 @@
 3) поднять сервак python manage.py runserver
 
 
-создать таск (author_login, executor_login, board_name --- уникальные): 
+создать таск (author_login, executor_login, board_name --- уникальные):
 ```
-curl -d "author_login=kek1&executor_login=kek2&board_name=asdascva&task_name=aaa&status=1" -X POST http://127.0.0.1:8000/tasks/createtask/
+var payload = {
+    "executor_login": "valentina94",
+    "board_name": "Доска 1",
+    "task_name": "Навалить фонка",
+    "status": "3",
+    "task_description":"надо очень жоска навалить фонка"
+    
+};
+
+var data = new FormData();
+data.append( "json", JSON.stringify( payload ) );
+
+fetch("http://127.0.0.1:8000/tasks/createtask/",
+{
+    method: "POST",
+    body: data
+})
 ```
 изменить таск по индексу таска можно передать любые поля для изменения: 
 ```
-curl -d "task_idx=3&executor_login=kek2&board_name=asdascva&task_name=blya&status=1" -X POST http://127.0.0.1:8000/tasks/edittask/```
-```
+var payload = {
+    "get_post":{"executor_login":"valentina94",
+               "task_name":"Навалить фонка",
+               "author":"lribakov"},
+    "change_post":{"executor_login": "valentina94",
+                    "board_name": "Доска 1",
+                    "task_name": "не Навалить фонка",
+                    "status": "3",
+                    "task_description":"не надо очень жоска навалить фонка"}
+    
+};
+
+var data = new FormData();
+data.append( "json", JSON.stringify( payload ) );
+
+fetch("http://127.0.0.1:8000/tasks/edittask/",
+{
+    method: "POST",
+    body: data
+})```
