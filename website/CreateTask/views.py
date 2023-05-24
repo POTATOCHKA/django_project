@@ -143,7 +143,13 @@ def parser_board_tasks(tasks):
 @csrf_exempt
 def boards_getter(request):
     if request.GET:
-        author = Users.objects.get(login=request.user)
+        print(request.user)
+        #print(list(Users.objects.all())[0].login)
+        if request.GET['name']:
+            author = Users.objects.get(login=request.GET['name'])
+        else:
+            author = Users.objects.get(login=request.user)
+        print(author)
         getted_tasks = Tasks.objects.filter(author=author)
         getted_tasks = list(getted_tasks)
         boards = []
