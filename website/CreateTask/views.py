@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from CreateTask.models import Tasks, Users, Boards
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
 import ast
+
 
 # http://127.0.0.1:8000/tasks/createtask/?name=kek
 
@@ -31,6 +33,8 @@ def task_creator(request):
         print(f"vse upalo, oshibka {e}")
         return HttpResponse(f"vse upalo, oshibka {e}")
     return HttpResponse("<h1>Create task</h1>")
+
+
 """
 var payload = {
     "executor_login": "valentina94",
@@ -55,14 +59,9 @@ fetch("http://127.0.0.1:8000/tasks/createtask/",
 @csrf_exempt
 def task_editor(request):
     try:
-        if request.POST: #curl -d "task_idx=3&executor_login=kek2&board_name=asdascva&task_name=blya&status=1" -X POST http://127.0.0.1:8000/tasks/edittask/
-
+        if request.POST:
             request.POST = ast.literal_eval(request.POST['json'])
-            author = Users.objects.get(login=request.POST['get_post']['author'])
-            executor = Users.objects.get(login=request.POST['get_post']['executor_login'])
-            task = Tasks.objects.filter(author=author,
-                                        task_name=request.POST['get_post']['task_name'],
-                                        executor=executor)
+            task = Tasks.objects.filter(pk=request.POST['get_post']['task_id'])
             task = task[0]
             request.POST = request.POST['change_post']
             if 'author_login' in request.POST:
@@ -86,6 +85,7 @@ def task_editor(request):
         return HttpResponse(f"vse upalo, oshibka {e}")
     return HttpResponse("<h1>Edit task</h1>")
 
+
 """
 var payload = {
     "get_post":{"executor_login":"valentina94",
@@ -108,3 +108,53 @@ fetch("http://127.0.0.1:8000/tasks/edittask/",
     body: data
 })
 """
+
+
+def parse_user_fieds(user):
+    output_dict = {'user_id': user.pk,
+                   'surname': user.surname,
+                   'user_name': user.user_name,
+                   'patronymic': user.patronymic,
+                   'login': user.login,
+                   'email': user.email}
+    return output_dict
+
+
+def parser_board_tasks(tasks):
+    tasks = list(tasks)
+    output_dict = {}
+    for task in tasks:
+        try:
+            print(task.author)
+            # author = Users.objects.get(login=task.author)
+            # executor = Users.objects.get(login=task.executor)
+            output_dict.update({task.pk: {'task_id': task.pk,
+                                          'task_name': task.task_name,
+                                          'author': parse_user_fieds(task.author),
+                                          'executor': parse_user_fieds(task.executor),
+                                          'task_create_date': str(task.task_create_date),
+                                          'status': task.status,
+                                          'task_description': task.task_description}})
+        except Exception as e:
+            print(e)
+    return output_dict
+
+
+@csrf_exempt
+def boards_getter(request):
+    if request.GET:
+        author = Users.objects.get(login=request.user)
+        getted_tasks = Tasks.objects.filter(author=author)
+        getted_tasks = list(getted_tasks)
+        boards = []
+        for task in getted_tasks:
+            boards.append(task.board)
+        board_to_task = {}
+        for board in boards:
+            board_tasks = Tasks.objects.filter(board=board)
+            board_to_task.update({board.pk: {'board_name': board.board_name,
+                                             'board_tasks': parser_board_tasks(board_tasks)}})
+
+        print(board_to_task)
+        return JsonResponse(board_to_task)
+    return HttpResponse("pass GET request")

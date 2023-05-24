@@ -28,12 +28,10 @@ fetch("http://127.0.0.1:8000/tasks/createtask/",
 изменить таск по индексу таска можно передать любые поля для изменения: 
 ```
 var payload = {
-    "get_post":{"executor_login":"valentina94",
-               "task_name":"Навалить фонка",
-               "author":"lribakov"},
-    "change_post":{"executor_login": "valentina94",
+    "get_post":{"task_id":"1154"},
+    "change_post":{"executor_login": "lribakov",
                     "board_name": "Доска 1",
-                    "task_name": "не Навалить фонка",
+                    "task_name": "KEKI",
                     "status": "3",
                     "task_description":"не надо очень жоска навалить фонка"}
     
@@ -46,4 +44,10 @@ fetch("http://127.0.0.1:8000/tasks/edittask/",
 {
     method: "POST",
     body: data
-})```
+})
+```
+
+get запрос на выдачу всех бордов юзера и всех тасок в них и вообще всего говна(get запрос может быть любое, главное get):
+```
+http://127.0.0.1:8000/tasks/getboards/?kek=1
+```
